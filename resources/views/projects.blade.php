@@ -4,5 +4,6 @@
 
 @section('content')
     <h1>Project Saya</h1>
-    <p>Daftar project akan ditampilkan di sini.</p>
+    <p>Project Website LovelyTrinkets PPW1</p>
+    <p>Project UI/UX Website PDE</p>
 @endsection
