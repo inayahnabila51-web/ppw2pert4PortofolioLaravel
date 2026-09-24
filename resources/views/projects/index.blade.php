@@ -5,6 +5,9 @@
 @section('content')
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
+@if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
         <h1>Projects</h1>
 
         @if(count($projects) > 0)

@@ -7,77 +7,66 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
-         $data = [
+        $data = [
             'projects' => Project::all()
-         ]; 
-         return view('projects.index')->with($data);
+        ];
+        return view('projects.index')->with($data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
         return view('projects.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
         $request->validate([
-            'title' => 'required|max:200',
-            'description' => 'required',
+            'title' => 'required|min:5|max:200',
+            'description' => 'required|min:10',
         ]);
 
         Project::create($request->only(['title', 'description']));
 
-        return redirect()->route('projects.index');
+        return redirect()->route('projects.index')
+            ->with('success', 'Project berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id)
     {
-        //
         $data = [
-            'project' => Project::find($id)
+            'project' => Project::findOrFail($id)
         ];
-
         return view('projects.show')->with($data);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit($id)
     {
-        //
+        $project = Project::findOrFail($id);
+        return view('projects.edit', ['project' => $project]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'title' => 'required|min:5|max:200',
+            'description' => 'required|min:10',
+        ]);
+
+        $project = Project::findOrFail($id);
+        $project->update($validatedData);
+
+        return redirect()->route('projects.index')
+            ->with('success', 'Project berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $project = Project::findOrFail($id);
+        $project->delete();
+
+        return redirect()->route('projects.index')
+            ->with('success', 'Project berhasil dihapus.');
     }
 }
