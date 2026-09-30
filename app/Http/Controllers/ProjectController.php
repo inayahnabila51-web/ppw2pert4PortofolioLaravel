@@ -10,7 +10,9 @@ class ProjectController extends Controller
     public function index()
     {
         $data = [
-            'projects' => Project::all()
+            'projects' => Project::all(),
+            'totalProjects' => Project::count(),
+            'latestProject' => Project::latest()->first(),
         ];
         return view('projects.index')->with($data);
     }
@@ -25,9 +27,10 @@ class ProjectController extends Controller
         $request->validate([
             'title' => 'required|min:5|max:200',
             'description' => 'required|min:10',
+            'status' => 'required|in:draft,published',
         ]);
 
-        Project::create($request->only(['title', 'description']));
+        Project::create($request->only(['title', 'description', 'status']));
 
         return redirect()->route('projects.index')
             ->with('success', 'Project berhasil ditambahkan.');
@@ -52,6 +55,7 @@ class ProjectController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|min:5|max:200',
             'description' => 'required|min:10',
+            'status' => 'required|in:draft,published',
         ]);
 
         $project = Project::findOrFail($id);
@@ -68,5 +72,29 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.index')
             ->with('success', 'Project berhasil dihapus.');
+    }
+
+    public function trash()
+    {
+        $data = [
+            'projects' => Project::onlyTrashed()->get()
+        ];
+        return view('projects.trash')->with($data);
+    }
+
+    public function restore($id)
+    {
+        Project::withTrashed()->find($id)->restore();
+
+        return redirect()->route('projects.trash')
+            ->with('success', 'Project berhasil dikembalikan.');
+    }
+
+    public function forceDelete($id)
+    {
+        Project::withTrashed()->find($id)->forceDelete();
+
+        return redirect()->route('projects.trash')
+            ->with('success', 'Project berhasil dihapus permanen.');
     }
 }

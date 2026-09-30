@@ -16,6 +16,13 @@
                 <label for="description">Description</label>
                 <textarea class="form-control" id="description" name="description" rows="5"></textarea>
             </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="draft" {{ (old('status', '') == 'draft') ? 'selected' : '' }}>Draft</option>
+                    <option value="published" {{ (old('status', '') == 'published') ? 'selected' : '' }}>Published</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>

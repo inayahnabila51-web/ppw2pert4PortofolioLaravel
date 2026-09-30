@@ -24,6 +24,13 @@
             <label for="description">Description</label>
             <textarea class="form-control" id="description" name="description" rows="5">{{ old('description', $project->description) }}</textarea>
         </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select class="form-control" id="status" name="status">
+                <option value="draft" {{ (old('status', $project->status ?? '') == 'draft') ? 'selected' : '' }}>Draft</option>
+                <option value="published" {{ (old('status', $project->status ?? '') == 'published') ? 'selected' : '' }}>Published</option>
+            </select>
+        </div>
         <button type="submit" class="btn btn-primary">Update</button>
     </form>
 </div>
