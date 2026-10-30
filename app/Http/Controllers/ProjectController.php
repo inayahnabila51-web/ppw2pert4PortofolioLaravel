@@ -7,13 +7,34 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
+        // Latihan 4: hanya izinkan 5, 10, atau 25
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25])) {
+            $perPage = 10;
+        }
+
+        $projects = Project::query()
+            // Latihan 3: filter judul kalau ada kata pencarian
+            ->when($search, function ($query, $search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
         $data = [
-            'projects' => Project::all(),
+            'projects' => $projects,
             'totalProjects' => Project::count(),
             'latestProject' => Project::latest()->first(),
+            'search' => $search,
+            'perPage' => $perPage,
         ];
+
         return view('projects.index')->with($data);
     }
 
