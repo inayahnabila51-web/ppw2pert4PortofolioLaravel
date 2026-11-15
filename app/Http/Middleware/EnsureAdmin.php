@@ -10,7 +10,7 @@ class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->email !== 'admin@example.com') {
+        if ($request->user()?->role !== 'admin') {
             abort(403, 'Akses ditolak.');
         }
 
