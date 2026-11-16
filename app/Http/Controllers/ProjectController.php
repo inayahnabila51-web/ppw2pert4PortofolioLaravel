@@ -3,22 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Category;
 use App\Models\Project;
 
 class ProjectController extends Controller
 {
+    private function rules(): array
+    {
+        return [
+            'title' => 'required|min:5|max:200',
+            'description' => 'required|min:10',
+            'status' => 'required|in:draft,published',
+            'category_id' => 'nullable|exists:categories,id',
+            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+                . '|dimensions:min_width=400,min_height=300',
+        ];
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
 
-        // Latihan 4: hanya izinkan 5, 10, atau 25
         $perPage = (int) $request->input('per_page', 10);
         if (!in_array($perPage, [5, 10, 25])) {
             $perPage = 10;
         }
 
         $projects = Project::query()
-            // Latihan 3: filter judul kalau ada kata pencarian
             ->when($search, function ($query, $search) {
                 $query->where('title', 'like', '%' . $search . '%');
             })
@@ -40,18 +52,21 @@ class ProjectController extends Controller
 
     public function create()
     {
-        return view('projects.create');
+        return view('projects.create', ['categories' => Category::all()]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|min:5|max:200',
-            'description' => 'required|min:10',
-            'status' => 'required|in:draft,published',
-        ]);
+        $validated = $request->validate($this->rules());
 
-        Project::create($request->only(['title', 'description', 'status']));
+
+        if ($request->hasFile('thumbnail')) {
+            $validated['thumbnail'] = $request->file('thumbnail')
+                ->store('projects/thumbnails', 'public');
+        }
+
+
+        Project::create($validated);
 
         return redirect()->route('projects.index')
             ->with('success', 'Project berhasil ditambahkan.');
@@ -59,28 +74,32 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $data = [
-            'project' => Project::findOrFail($id)
-        ];
-        return view('projects.show')->with($data);
+        $project = Project::with(['category', 'images'])->findOrFail($id);
+        return view('projects.show', ['project' => $project]);
     }
 
     public function edit($id)
     {
-        $project = Project::findOrFail($id);
-        return view('projects.edit', ['project' => $project]);
+        return view('projects.edit', [
+            'project' => Project::with('images')->findOrFail($id),
+            'categories' => Category::all(),
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|min:5|max:200',
-            'description' => 'required|min:10',
-            'status' => 'required|in:draft,published',
-        ]);
-
+        $validated = $request->validate($this->rules());
         $project = Project::findOrFail($id);
-        $project->update($validatedData);
+
+        if ($request->hasFile('thumbnail')) {
+            if ($project->thumbnail) {
+                Storage::disk('public')->delete($project->thumbnail);
+            }
+            $validated['thumbnail'] = $request->file('thumbnail')
+                ->store('projects/thumbnails', 'public');
+        }
+
+        $project->update($validated);
 
         return redirect()->route('projects.index')
             ->with('success', 'Project berhasil diperbarui.');
@@ -88,8 +107,8 @@ class ProjectController extends Controller
 
     public function destroy($id)
     {
-        $project = Project::findOrFail($id);
-        $project->delete();
+        // Soft delete: file JANGAN dihapus, supaya project masih utuh saat di-restore
+        Project::findOrFail($id)->delete();
 
         return redirect()->route('projects.index')
             ->with('success', 'Project berhasil dihapus.');
@@ -97,15 +116,12 @@ class ProjectController extends Controller
 
     public function trash()
     {
-        $data = [
-            'projects' => Project::onlyTrashed()->get()
-        ];
-        return view('projects.trash')->with($data);
+        return view('projects.trash', ['projects' => Project::onlyTrashed()->get()]);
     }
 
     public function restore($id)
     {
-        Project::withTrashed()->find($id)->restore();
+        Project::withTrashed()->findOrFail($id)->restore();
 
         return redirect()->route('projects.trash')
             ->with('success', 'Project berhasil dikembalikan.');
@@ -113,7 +129,17 @@ class ProjectController extends Controller
 
     public function forceDelete($id)
     {
-        Project::withTrashed()->find($id)->forceDelete();
+        $project = Project::withTrashed()->with('images')->findOrFail($id);
+
+        // Hapus permanen: baru file fisiknya ikut dihapus
+        if ($project->thumbnail) {
+            Storage::disk('public')->delete($project->thumbnail);
+        }
+        foreach ($project->images as $image) {
+            Storage::disk('public')->delete($image->image);
+        }
+
+        $project->forceDelete(); // baris project_images ikut hilang (cascadeOnDelete)
 
         return redirect()->route('projects.trash')
             ->with('success', 'Project berhasil dihapus permanen.');

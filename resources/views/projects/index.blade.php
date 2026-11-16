@@ -44,6 +44,9 @@
                 <h3>
                     {{ $projects->firstItem() + $loop->index }}.
                     <a href="/projects/{{ $project->id }}">{{ $project->title }}</a>
+                    @if($project->thumbnail)
+                        <img src="{{ asset('storage/' . $project->thumbnail) }}" alt="{{ $project->title }}" style="height:50px">
+                    @endif
                 </h3>
             </div>
         @endforeach

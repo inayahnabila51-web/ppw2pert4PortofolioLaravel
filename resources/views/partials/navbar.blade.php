@@ -7,6 +7,11 @@
             <a class="nav-link" href="{{ route('education') }}">Education</a>
             <a class="nav-link" href="{{ route('projects.index') }}">Projects</a>
 
+            @auth
+                <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ route('skills.index') }}">Skills</a>
+            @endauth
+
             <div class="ms-auto d-flex align-items-center gap-2">
                 @auth
                     <a class="nav-link" href="{{ route('profile.saya') }}">Halo, {{ Auth::user()->name }}</a>

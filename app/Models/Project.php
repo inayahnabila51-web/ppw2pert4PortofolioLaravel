@@ -10,11 +10,17 @@ class Project extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
-        'title',
-        'description',
-        'status',
-    ];
+    protected $fillable = ['title', 'description', 'status', 'category_id', 'thumbnail'];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
+    }
 
     public function scopePublished(Builder $query): Builder
     {
