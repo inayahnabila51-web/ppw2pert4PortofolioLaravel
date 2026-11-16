@@ -16,13 +16,13 @@
                 <h3>{{ $project->title }}</h3>
                 <p>{{ $project->description }}</p>
 
-                <form action="{{ route('projects.restore', $project->id) }}" method="POST" style="display:inline">
+                <form action="{{ route('admin.projects.restore', $project->id) }}" method="POST" style="display:inline">
                     @csrf
                     @method('PUT')
                     <button type="submit" class="btn btn-success">Restore</button>
                 </form>
 
-                <form action="{{ route('projects.forceDelete', $project->id) }}" method="POST" style="display:inline"
+                <form action="{{ route('admin.projects.forceDelete', $project->id) }}" method="POST" style="display:inline"
                     onsubmit="return confirm('Data akan dihapus PERMANEN dan tidak bisa dikembalikan. Yakin?');">
                     @csrf
                     @method('DELETE')
@@ -34,6 +34,6 @@
         <h3>Tidak ada data di trash.</h3>
     @endif
 
-    <a href="{{ route('projects.index') }}">Kembali ke Daftar Project</a>
+    <a href="{{ route('admin.projects.index') }}">Kembali ke Daftar Project</a>
 </div>
 @endsection

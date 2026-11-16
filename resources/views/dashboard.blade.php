@@ -39,7 +39,7 @@
             <ul class="list-group">
                 @foreach ($latestProjects as $p)
                     <li class="list-group-item">
-                        <a href="{{ route('projects.show', $p->id) }}">{{ $p->title }}</a>
+                        <a href="{{ route('admin.projects.show', $p->id) }}">{{ $p->title }}</a>
                         <small class="text-muted">({{ $p->category->name ?? 'Tanpa kategori' }})</small>
                     </li>
                 @endforeach

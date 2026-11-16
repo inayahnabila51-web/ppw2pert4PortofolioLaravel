@@ -10,7 +10,24 @@ class Project extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'status', 'category_id', 'thumbnail'];
+    protected $fillable = [
+        'title', 'slug', 'category_id', 'short_description', 'description',
+        'status', 'project_date', 'is_featured', 'project_url',
+        'repository_url', 'thumbnail',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'project_date' => 'date',
+            'is_featured'  => 'boolean',
+        ];
+    }
+
+    public function technologies()
+    {
+        return $this->belongsToMany(Technology::class);
+    }
 
     public function category()
     {

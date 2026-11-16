@@ -15,16 +15,23 @@
         <p>Project Terbaru: {{ $latestProject->title }}</p>
     @endif
 
-    {{-- Form pencarian + pilihan jumlah per halaman --}}
-    <form action="{{ route('projects.index') }}" method="GET" class="row g-2 mb-3">
-        <div class="col-md-6">
+    {{-- Form pencarian + filter status + pilihan jumlah per halaman --}}
+    <form action="{{ route('admin.projects.index') }}" method="GET" class="row g-2 mb-3">
+        <div class="col-md-4">
             <input type="text" name="search" class="form-control"
                    placeholder="Cari judul project..." value="{{ $search }}">
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">Semua status</option>
+                <option value="draft" @selected($status === 'draft')>Draft</option>
+                <option value="published" @selected($status === 'published')>Published</option>
+            </select>
         </div>
         <div class="col-md-3">
             <select name="per_page" class="form-select" onchange="this.form.submit()">
                 @foreach ([5, 10, 25] as $option)
-                    <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
+                    <option value="{{ $option }}" @selected($perPage == $option)>
                         {{ $option }} per halaman
                     </option>
                 @endforeach
@@ -32,8 +39,8 @@
         </div>
         <div class="col-md-3">
             <button type="submit" class="btn btn-primary">Cari</button>
-            @if($search)
-                <a href="{{ route('projects.index') }}" class="btn btn-secondary">Reset</a>
+            @if($search || $status)
+                <a href="{{ route('admin.projects.index') }}" class="btn btn-secondary">Reset</a>
             @endif
         </div>
     </form>
@@ -43,7 +50,10 @@
             <div class="well">
                 <h3>
                     {{ $projects->firstItem() + $loop->index }}.
-                    <a href="/projects/{{ $project->id }}">{{ $project->title }}</a>
+                    <a href="{{ route('admin.projects.show', $project->id) }}">{{ $project->title }}</a>
+                    <span class="badge {{ $project->status === 'published' ? 'bg-success' : 'bg-secondary' }}">
+                        {{ ucfirst($project->status) }}
+                    </span>
                     @if($project->thumbnail)
                         <img src="{{ asset('storage/' . $project->thumbnail) }}" alt="{{ $project->title }}" style="height:50px">
                     @endif
@@ -66,7 +76,7 @@
         {{ $projects->links() }}
     </div>
 
-    <a href="{{ route('projects.trash') }}">🗑 Lihat Trash</a>
-    <a href="{{ route('projects.create') }}">+ Tambah Project</a>
+    <a href="{{ route('admin.projects.trash') }}">🗑 Lihat Trash</a>
+    <a href="{{ route('admin.projects.create') }}">+ Tambah Project</a>
 </div>
 @endsection

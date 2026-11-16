@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProjectTableSeeder::class,   // harus duluan (dia yang truncate)
             ProjectRandomSeeder::class,
+            PortfolioDemoSeeder::class,
         ]);
     }
 }

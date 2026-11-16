@@ -5,10 +5,11 @@
             <a class="nav-link" href="{{ route('home') }}">Home</a>
             <a class="nav-link" href="{{ route('about') }}">About</a>
             <a class="nav-link" href="{{ route('education') }}">Education</a>
-            <a class="nav-link" href="{{ route('projects.index') }}">Projects</a>
+            <a class="nav-link" href="{{ route('projects') }}">Projects</a>
 
             @auth
                 <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ route('admin.projects.index') }}">Kelola Project</a>
                 <a class="nav-link" href="{{ route('skills.index') }}">Skills</a>
             @endauth
 
